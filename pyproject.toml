@@ -1,6 +1,6 @@
 [project]
 name = "basalt-scan"
-version = "0.1.0"
+version = "0.1.1"
 description = "A purple-team of AI agents that audits code security and proves findings by execution."
 readme = "README.md"
 requires-python = ">=3.11"
