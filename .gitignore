@@ -1,0 +1,40 @@
+# --- Basalt ---
+# findings store local
+.basalt/
+# config real (usa el .example del repo)
+config/basalt.yaml
+
+# Contexto privado / reglas del usuario
+MEMORY.md
+OPERATION.md
+BCK/
+DOC/
+
+# Secretos
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+
+# macOS / editores
+.DS_Store
+._*
+.vscode/
+.idea/
+
+# Roadmap/planificación interna (no público)
+PLAN.md
+TODO.md
+AGENTS.md

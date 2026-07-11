@@ -1,0 +1,75 @@
+# Basalt — configuración. Copia a config/basalt.yaml y ajusta.
+# La capa de modelos es SUPER CONECTABLE: cada rol acepta una CADENA de proveedores
+# (fallback en orden). Providers disponibles: claude_cli, claude_api, openai_compat, ollama.
+
+# Cadena por defecto para roles que no especifiquen la suya:
+default_providers:
+  - provider: claude_cli          # usa tu SUSCRIPCIÓN (Claude Code CLI, sin API key)
+    model: ""                     # vacío = modelo por defecto de tu plan
+  - provider: claude_api          # fallback a API si el CLI no está
+    model: claude-opus-4-8
+    api_key_env: ANTHROPIC_API_KEY
+  - provider: openai_compat          # fallback a tu gateway on-prem
+    model: qwen3:14b
+    base_url: http://localhost:8080/v1
+  - provider: ollama              # último recurso: local, offline
+    model: qwen3:14b
+    base_url: http://localhost:11434/v1
+
+roles:
+  # El auditor/juez (purple) merece el mejor modelo; el recon puede ir barato/local.
+  recon:
+    providers:
+      - { provider: ollama, model: qwen3:8b }
+      - { provider: claude_cli }
+  red_find:
+    providers:
+      - { provider: claude_cli }
+      - { provider: claude_api, model: claude-sonnet-5 }
+  purple_verify:
+    providers:
+      - { provider: claude_api, model: claude-opus-4-8 }   # calidad máxima para el juez
+      - { provider: claude_cli }
+  blue_patch:
+    providers:
+      - { provider: claude_cli }
+  grader:
+    providers:
+      - { provider: claude_api, model: claude-opus-4-8 }
+
+target:
+  kind: generic            # generic | python | go | typescript | rust | solidity (alias: py, golang, ts/js/node/react, sol, rs)
+
+sandbox:
+  driver: docker           # docker (gVisor con gvisor: true)
+  # image: si se OMITE, se usa la imagen con toolchain por defecto del lenguaje
+  #   python->python:3.12-slim · go->golang:1.22 · typescript->node:20-slim
+  #   rust->rust:1.79-slim · solidity->ghcr.io/foundry-rs/foundry · generic->ubuntu:24.04
+  # image: ubuntu:24.04    # descomenta para forzar una imagen concreta
+  gvisor: false            # true -> añade --runtime=runsc (kernel de usuario)
+  network: false           # egress cerrado al reproducir el PoC (recomendado)
+  build_network: false     # red durante el build (subir a true si el build baja deps)
+  cpus: "2"                # límite de CPU del contenedor
+  memory: 2g               # límite de memoria
+  build_timeout: 300       # seg. para build_cmd
+  poc_timeout: 180         # seg. para reproduce_cmd (el PoC)
+
+audit:
+  red_runs: 3              # nº de find-agents independientes por partición (consenso)
+  min_votes: 2             # votos (reproducciones independientes) para "confirmado"
+  require_execution: true  # exigir reproducción por EJECUCIÓN para confirmar (núcleo anti-FP)
+  auto_patch: false        # true -> tras confirmar, lanzar blue_patch + grader (o usar `--patch`)
+  max_parallel: 4          # concurrencia máx: find-agents en paralelo y sandboxes de verificación
+  # checks: [sql-injection, auth-bypass, ssrf]   # filtra el catálogo (vacío/omitido = todos)
+
+store_path: .basalt/findings.jsonl
+
+# Identidad para la PORTADA del documento de auditoría (Word/PDF). Todo opcional.
+identity:
+  org: Arkessiah                 # organización que firma el informe
+  auditor: ""                     # nombre del auditor (si vacío, se usa org)
+  contact: ""                     # email/contacto
+  logo: ""                        # ruta a un PNG/JPG para la portada (opcional)
+
+# Idioma del informe/documento: en | es (default en)
+lang: en
