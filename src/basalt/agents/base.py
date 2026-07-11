@@ -1,18 +1,19 @@
 """Agente base: un rol = prompt de sistema + un ModelProvider.
 
 Los roles (recon/red/purple/blue/grader) heredan de aquí. El prompt de cada rol
-vive en `prompts/<role>.md` para poder iterarlo sin tocar código.
+vive en `basalt/prompts/<role>.md` (empaquetado, se lee con importlib.resources
+para que funcione instalado desde PyPI).
 """
 from __future__ import annotations
-from pathlib import Path
+from importlib import resources
 from ..providers.base import ModelProvider, Message
-
-PROMPTS_DIR = Path(__file__).resolve().parents[3] / "prompts"
 
 
 def load_prompt(role: str) -> str:
-    p = PROMPTS_DIR / f"{role}.md"
-    return p.read_text(encoding="utf-8") if p.exists() else f"You are the {role} agent."
+    try:
+        return (resources.files("basalt") / "prompts" / f"{role}.md").read_text(encoding="utf-8")
+    except (FileNotFoundError, ModuleNotFoundError, OSError):
+        return f"You are the {role} agent."
 
 
 class Agent:

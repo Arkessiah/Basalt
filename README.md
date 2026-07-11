@@ -1,5 +1,10 @@
 # Basalt 🛡️🔴🔵🟣
 
+[![CI](https://github.com/Arkessiah/Basalt/actions/workflows/ci.yml/badge.svg)](https://github.com/Arkessiah/Basalt/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/basalt-scan)](https://pypi.org/project/basalt-scan/)
+[![Python](https://img.shields.io/pypi/pyversions/basalt-scan)](https://pypi.org/project/basalt-scan/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **A purple-team of AI agents that audits code security and *proves* findings by execution — not by opinion.**
 
 Most "AI security scanners" hand you a list of maybe-bugs a model *thinks* it
@@ -47,15 +52,27 @@ recon → red (find × N) → purple (verify) → EXECUTION in sandbox → blue 
 ## Install
 
 ```bash
-git clone https://github.com/Arkessiah/Basalt && cd Basalt
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[claude,doc]"     # add ,mcp for the MCP server; ,sandbox for the docker SDK
-basalt init                        # writes config/basalt.yaml
+pipx install "basalt-scan[claude,doc]"   # recommended — installs the `basalt` command
+# or: pip install "basalt-scan[claude,doc]"
+basalt init                              # writes config/basalt.yaml
 ```
+
+The distribution is **`basalt-scan`**; the command and import package are
+**`basalt`**. Extras: `claude` (Anthropic SDK), `doc` (Word/PDF reports),
+`mcp` (MCP server), `sandbox` (Docker SDK).
 
 Docker is required for execution-based verification. `govulncheck` is optional
 (Go reachability). The Word/PDF report uses WeasyPrint, which needs system libs
 (`pango`, `cairo`).
+
+<details><summary>From source (development)</summary>
+
+```bash
+git clone https://github.com/Arkessiah/Basalt && cd Basalt
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev,claude,doc]"
+```
+</details>
 
 ## Usage
 

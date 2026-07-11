@@ -1,5 +1,5 @@
 [project]
-name = "basalt"
+name = "basalt-scan"
 version = "0.1.0"
 description = "A purple-team of AI agents that audits code security and proves findings by execution."
 readme = "README.md"
@@ -46,6 +46,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/basalt"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/basalt", "config", "README.md", "LICENSE", "CHANGELOG.md"]
 
 [tool.ruff]
 line-length = 110
