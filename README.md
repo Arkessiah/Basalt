@@ -7,6 +7,8 @@
 
 **A purple-team of AI agents that audits code security and *proves* findings by execution — not by opinion.**
 
+<p align="center"><img src="assets/demo.svg" alt="Basalt audit demo — verification funnel: 41 candidates to 5 confirmed" width="720"></p>
+
 Most "AI security scanners" hand you a list of maybe-bugs a model *thinks* it
 found. Basalt is different: a finding is only **confirmed** when its
 proof-of-concept is **reproduced by execution** in a clean, isolated sandbox
