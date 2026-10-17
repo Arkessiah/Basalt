@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from basalt import deps
 
 
@@ -182,3 +184,38 @@ def test_severity_desde_cvss_score():
     assert deps._severity_of({"severity": [{"score": "9.8"}]}) == "critical"
     assert deps._severity_of({"severity": [{"score": "5.0"}]}) == "medium"
     assert deps._severity_of({}) == "high"          # conservador por defecto
+
+
+class _Resp:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        return self._payload
+
+
+def test_query_batch_trocea_en_tandas_de_1000(monkeypatch):
+    import httpx
+    sizes = []
+
+    def fake_post(url, json, timeout):
+        qs = json["queries"]
+        sizes.append(len(qs))
+        # cada paquete "vulnerable" lleva su nombre como ID para comprobar el orden
+        return _Resp({"results": [{"vulns": [{"id": q["package"]["name"]}]} for q in qs]})
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    pkgs = [deps.Package(f"p{i}", "1.0.0", "npm") for i in range(2001)]
+    ids = deps.OSVClient().query_batch(pkgs)
+    assert sizes == [1000, 1000, 1]
+    assert ids == [[f"p{i}"] for i in range(2001)]
+
+
+def test_query_batch_falla_si_osv_desalinea(monkeypatch):
+    import httpx
+    monkeypatch.setattr(httpx, "post", lambda url, json, timeout: _Resp({"results": []}))
+    with pytest.raises(ValueError):
+        deps.OSVClient().query_batch([deps.Package("a", "1.0.0", "npm")])

@@ -235,15 +235,25 @@ class OSVClient:
     def __init__(self, timeout: float = 20.0):
         self.timeout = timeout
 
+    # OSV rechaza con 400 un querybatch de más de 1000 consultas: se trocea en tandas.
+    BATCH_LIMIT = 1000
+
     def query_batch(self, packages: list[Package]) -> list[list[str]]:
         """Devuelve, por paquete (mismo orden), la lista de IDs de vulnerabilidad."""
         import httpx
-        queries = [{"package": {"name": p.name, "ecosystem": p.ecosystem}, "version": p.version}
-                   for p in packages]
-        r = httpx.post(f"{OSV_API}/v1/querybatch", json={"queries": queries}, timeout=self.timeout)
-        r.raise_for_status()
-        results = r.json().get("results", [])
-        return [[v.get("id") for v in (res or {}).get("vulns", [])] for res in results]
+        out: list[list[str]] = []
+        for i in range(0, len(packages), self.BATCH_LIMIT):
+            chunk = packages[i:i + self.BATCH_LIMIT]
+            queries = [{"package": {"name": p.name, "ecosystem": p.ecosystem}, "version": p.version}
+                       for p in chunk]
+            r = httpx.post(f"{OSV_API}/v1/querybatch", json={"queries": queries},
+                           timeout=self.timeout)
+            r.raise_for_status()
+            results = r.json().get("results", [])
+            if len(results) != len(chunk):   # sin esto, los IDs se asignarían al paquete equivocado
+                raise ValueError(f"OSV devolvió {len(results)} resultados para {len(chunk)} consultas")
+            out.extend([v.get("id") for v in (res or {}).get("vulns", [])] for res in results)
+        return out
 
     def get_vuln(self, vuln_id: str) -> dict:
         import httpx
