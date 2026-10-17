@@ -197,14 +197,14 @@ class _Resp:
         return self._payload
 
 
-def test_query_batch_trocea_en_tandas_de_1000(monkeypatch):
+def test_query_batch_splits_into_chunks_of_1000(monkeypatch):
     import httpx
     sizes = []
 
     def fake_post(url, json, timeout):
         qs = json["queries"]
         sizes.append(len(qs))
-        # cada paquete "vulnerable" lleva su nombre como ID para comprobar el orden
+        # each package returns its own name as the vuln ID, so ordering can be checked
         return _Resp({"results": [{"vulns": [{"id": q["package"]["name"]}]} for q in qs]})
 
     monkeypatch.setattr(httpx, "post", fake_post)
@@ -214,7 +214,7 @@ def test_query_batch_trocea_en_tandas_de_1000(monkeypatch):
     assert ids == [[f"p{i}"] for i in range(2001)]
 
 
-def test_query_batch_falla_si_osv_desalinea(monkeypatch):
+def test_query_batch_raises_on_misaligned_osv_response(monkeypatch):
     import httpx
     monkeypatch.setattr(httpx, "post", lambda url, json, timeout: _Resp({"results": []}))
     with pytest.raises(ValueError):

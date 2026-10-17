@@ -235,7 +235,7 @@ class OSVClient:
     def __init__(self, timeout: float = 20.0):
         self.timeout = timeout
 
-    # OSV rechaza con 400 un querybatch de más de 1000 consultas: se trocea en tandas.
+    # OSV rejects a querybatch with more than 1000 queries (HTTP 400), so it is split into chunks.
     BATCH_LIMIT = 1000
 
     def query_batch(self, packages: list[Package]) -> list[list[str]]:
@@ -250,8 +250,8 @@ class OSVClient:
                            timeout=self.timeout)
             r.raise_for_status()
             results = r.json().get("results", [])
-            if len(results) != len(chunk):   # sin esto, los IDs se asignarían al paquete equivocado
-                raise ValueError(f"OSV devolvió {len(results)} resultados para {len(chunk)} consultas")
+            if len(results) != len(chunk):   # otherwise IDs would be mapped to the wrong package
+                raise ValueError(f"OSV returned {len(results)} results for {len(chunk)} queries")
             out.extend([v.get("id") for v in (res or {}).get("vulns", [])] for res in results)
         return out
 
