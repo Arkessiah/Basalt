@@ -1,1 +1,0 @@
-{"title": "vuln", "severity": "high", "category": "c", "target": "x", "location": "x:1", "description": "", "poc": "echo HK-POC-TRIGGERED", "status": "patched", "votes": 2, "finder": "", "meta": {"patch": {"files": ["x"], "checks": {"build": true, "poc_closed": true, "tests_pass": true}, "rationale": "fix mínimo"}}}

@@ -34,9 +34,9 @@ def test_build_meta_hash_estable_e_independiente_del_orden():
 
 
 def test_build_meta_respeta_identidad_config():
-    m = audit_doc.build_meta({"org": "Exteric", "auditor": "Antonio"}, target="r",
+    m = audit_doc.build_meta({"org": "Acme", "auditor": "Jane Doe"}, target="r",
                              findings=[], date="d")
-    assert m.org == "Exteric" and m.auditor == "Antonio"
+    assert m.org == "Acme" and m.auditor == "Jane Doe"
 
 
 def test_render_html_incluye_portada_poc_y_evidencia():
