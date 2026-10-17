@@ -34,7 +34,7 @@ Changelog = "https://github.com/Arkessiah/Basalt/blob/main/CHANGELOG.md"
 claude = ["anthropic>=0.40"]
 sandbox = ["docker>=7.1"]
 doc = ["python-docx>=1.1", "weasyprint>=60"]   # informe Word + PDF (WeasyPrint necesita pango/cairo del sistema)
-mcp = ["mcp>=1.2"]                              # servidor MCP (basalt mcp-serve)
+mcp = ["mcp>=1.2,<2"]                          # servidor MCP (basalt mcp-serve); usa la API v1 (mcp.server.fastmcp), rota en 2.x
 dev = ["pytest>=8", "ruff>=0.6"]
 
 [project.scripts]
